@@ -84,10 +84,11 @@ def run_discord_bot():
             logger.warning("\x1b[31mSwitch to replyAll mode\x1b[0m")
 
 
-    @discordClient.tree.command(name="chat-model", description="Switch the chat model between 'gemeni' and 'gpt-4'")
+    @discordClient.tree.command(name="chat-model", description="Switch the chat model between 'gemeni', 'gpt-4' and 'gpt-3.5-turbo'")
     @app_commands.choices(model=[
         app_commands.Choice(name="gemeni", value="gemeni"),
         app_commands.Choice(name="gpt-4", value="gpt-4"),
+        app_commands.Choice(name="gpt-3.5-turbo", value="gpt-3.5-turbo")
     ])
     async def chat_model(interaction: discord.Interaction, model: app_commands.Choice[str]):
         await interaction.response.defer(ephemeral=True)
@@ -99,6 +100,10 @@ def run_discord_bot():
             elif model.value == "gpt-4":
                 discordClient.reset_conversation_history()
                 discordClient.chatBot = Client(provider=RetryProvider([Liaobots, OpenaiChat, Bing], shuffle=False))
+                discordClient.chatModel = model.value
+            elif model.value == "gpt-3.5-turbo":
+                discordClient.reset_conversation_history()
+                discordClient.chatBot = Client(provider=RetryProvider([Liaobots, OpenaiChat], shuffle=False))
                 discordClient.chatModel = model.value
 
             await interaction.followup.send(f"> **INFO: Chat model switched to {model.name}.**")
@@ -122,7 +127,7 @@ def run_discord_bot():
     async def help(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
         await interaction.followup.send(""":star: **BASIC COMMANDS** \n
-        - `/chat [message]` Chat with ChatGPT(gpt-4)
+        - `/chat [message]` Chat with ChatGPT(gpt-4, gpt-3.5-turbo)
         - `/draw [prompt][model]` Generate an image with model you specific
         - `/switchpersona [persona]` Switch between optional ChatGPT jailbreaks
                 `dan`: DAN 13.5 (Latest Working ChatGPT Jailbreak prompt)
@@ -134,6 +139,7 @@ def run_discord_bot():
         - `/reset` Clear conversation history
         - `/chat-model` Switch different chat model
                 `gpt-4`: GPT-4 model
+                `gpt-3.5-turbo`: GPT-3.5-turbo
                 `Gemini`: Google gemeni-pro model
 
 For complete documentation, please visit:
